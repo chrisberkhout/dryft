@@ -115,25 +115,8 @@ order.each { |proc|
 
 
 
-
-
-
 # TODO:
-#   - add diff between job name and proc name
-# - function to actually do the updates back to the DB.
-#
-# - make proc_info and resolution funcs into an object?
+# - how can Job instances do updates from their deps (they would assume the deps are up-to-date)
+#   - how can Job instances find other jobs/deps (will Jobs have a list and allow lookup by id/name/proc ?)
 
 
-
-# def resolve(proc, resolved, unresolved):
-#    unresolved.append(proc)
-#    for dep in proc.deps:
-#       if dep not in resolved:
-#          if dep in unresolved:
-#             raise Exception('Circular reference detected: %s -> %s' % (node.name, edge.name))
-#          resolve(proc, resolved, unresolved)
-#    resolved.append(proc)
-#    unresolved.remove(proc)
-
-# http://www.electricmonk.nl/log/2008/08/07/dependency-resolving-algorithm/
