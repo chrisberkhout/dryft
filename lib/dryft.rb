@@ -3,21 +3,15 @@ require 'rubygems'
 require 'sqlite3'
 require 'nokogiri'
 
-class Object
-  def is_in?(array)
-    array.include?(self)
-  end
-  def not_in?(array)
-    !array.include?(self)
-  end
-end
+require 'ruby/object'
+
 
 
 # db = SQLite3::Database.new "/Users/chrisberkhout/Projects/matholroyd/dryft-data/Jobs.dat"
 db = SQLite3::Database.new "/Users/chrisberkhout/Desktop/Jobs.dat"
 
 proc_info = {}
-db.execute("SELECT i.id, i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c.id") { |id,name,code_xml|
+db.execute("SELECT hex(i.id), i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c.id") { |id,name,code_xml|
 
   if name =~ /^\<([^\/\>].*?)\>.*/ # job is a procedure
     proc = $1
@@ -39,12 +33,12 @@ db.execute("SELECT i.id, i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c
         if tag == proc # start of definition of the procedure
           abort "ERROR: at '#{name}:#{i+1}', attempt to define <#{proc}> within <#{tag_stack.last}>." if tag_stack.length > 0
           proc_info[proc][:def][:start] = i+1
-          puts "INFO: start of definition of procedure <#{proc}>."
+          # puts "INFO: start of definition of procedure <#{proc}>."
         elsif tag_stack.length == 0 || tag_stack.last == proc # start of definition of a direct dependency
           proc_info[proc][:deps][tag] = { :start => i+1 }
-          puts "INFO: start of definition of direct dependency <#{tag}>."
+          # puts "INFO: start of definition of direct dependency <#{tag}>."
         else
-          puts "INFO: start of definition of in-direct dependency <#{tag}>."
+          # puts "INFO: start of definition of in-direct dependency <#{tag}>."
         end
     
         tag_stack.push tag
@@ -57,12 +51,12 @@ db.execute("SELECT i.id, i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c
         
         if tag == proc # end of definition of the procedure
           proc_info[proc][:def][:end] = i+1
-          puts "INFO: end of definition of procedure <#{proc}>."
+          # puts "INFO: end of definition of procedure <#{proc}>."
         elsif tag_stack.length == 0 || tag_stack.last == proc # end of definition of a direct dependency
           proc_info[proc][:deps][tag][:end] = i+1
-          puts "INFO: end of definition of direct dependency <#{tag}>."
+          # puts "INFO: end of definition of direct dependency <#{tag}>."
         else
-          puts "INFO: end of definition of in-direct dependency <#{tag}>."
+          # puts "INFO: end of definition of in-direct dependency <#{tag}>."
         end
         
       end
@@ -102,14 +96,31 @@ def resolve_order(name, proc_info, resolved, unresolved)
   return resolved << name
 end
 
+order = resolve_order_all(proc_info)
+puts order.to_yaml
 
-puts "**********"
-puts ""
-puts resolve_order_all(proc_info).to_yaml
+order.each { |proc|
+  
+  code_xml = db.get_first_value("SELECT code FROM jobcode WHERE id = x'#{proc_info[proc][:id]}'")
+  puts "***** loaded #{proc} *****"
+  
+  proc_info[proc][:deps].each_pair { |dep_name,dep_info|
+    dep_xml = db.get_first_value("SELECT code FROM jobcode WHERE id = x'#{proc_info[dep_name][:id]}'")
+    puts "***** loaded DEP_XML for #{dep_name} *****"
+    
+    
+  }
+
+}
+
+
+
+
+
 
 # TODO:
-# - revise proc_info so that it can easily do a resolution order for all
 #   - add diff between job name and proc name
+# - function to actually do the updates back to the DB.
 #
 # - make proc_info and resolution funcs into an object?
 
