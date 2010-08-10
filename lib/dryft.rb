@@ -3,6 +3,16 @@ require 'rubygems'
 require 'sqlite3'
 require 'nokogiri'
 
+class Object
+  def is_in?(array)
+    array.include?(self)
+  end
+  def not_in?(array)
+    !array.include?(self)
+  end
+end
+
+
 # db = SQLite3::Database.new "/Users/chrisberkhout/Projects/matholroyd/dryft-data/Jobs.dat"
 db = SQLite3::Database.new "/Users/chrisberkhout/Desktop/Jobs.dat"
 
@@ -25,7 +35,7 @@ db.execute("SELECT i.id, i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c
       if comment && comment.inner_html =~ /^\<([^\/\>].*?)\>.*/ # opening tag
         tag = $1
         
-        abort "ERROR: at '#{name}:#{i+1}', reopening <#{tag}> here implies circuar dependency." if tag_stack.include?(tag)
+        abort "ERROR: at '#{name}:#{i+1}', reopening <#{tag}> here implies circuar dependency." if tag.is_in? tag_stack
         if tag == proc # start of definition of the procedure
           abort "ERROR: at '#{name}:#{i+1}', attempt to define <#{proc}> within <#{tag_stack.last}>." if tag_stack.length > 0
           proc_info[proc][:def][:start] = i+1
@@ -72,31 +82,30 @@ db.execute("SELECT i.id, i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c
 puts proc_info.to_yaml
 
 
-def o_res(proc_info)
-  results = {}
-  proc_info.keys.each { |name|
-    results[name] = resolve(name, proc_info, [], [])
-  }
-  return results
+def resolve_order_all(proc_info)
+  proc_info[:all] = { :deps => {} }
+  (proc_info.keys - [:all]).each { |p| proc_info[:all][:deps][p] = {} } 
+  return resolve_order(:all, proc_info, [], []) - [:all]
 end
 
 
-def resolve(name, proc_info, resolution_order, visited)
-  puts "resolving <#{name}>..."
-  abort "ERROR: circular dependency: <#{(visited[visited.index(name)..-1]<<name).join('> -> <')}>." if visited.include?(name)
-  proc_info[name][:deps].keys.each { |dep_name|
-    abort "ERROR: the procedure <#{dep_name}> is used at '<#{name}>:#{proc_info[name][:deps][dep_name][:start]}' but not defined." if proc_info[dep_name].nil?
-    new_to_resolve = resolve(dep_name, proc_info, resolution_order, visited << name) - resolution_order
-    resolution_order += new_to_resolve
+def resolve_order(name, proc_info, resolved, unresolved)
+  unresolved << name
+  proc_info[name][:deps].each_pair { |dep_name,dep_info|
+    abort "ERROR: at '<#{name}>:#{dep_info[:start]}', the procedure <#{dep_name}> is used but not defined." if proc_info[dep_name].nil?
+    if dep_name.not_in? resolved
+      abort "ERROR: circular dependency detected: <#{name}> -> <#{dep_name}>." if dep_name.is_in? unresolved
+      resolved = resolve_order(dep_name, proc_info, resolved, unresolved)
+      unresolved -= resolved
+    end
   }
-  resolution_order += [name]
-  return resolution_order
+  return resolved << name
 end
 
 
 puts "**********"
 puts ""
-puts o_res(proc_info).to_yaml
+puts resolve_order_all(proc_info).to_yaml
 
 # TODO:
 # - revise proc_info so that it can easily do a resolution order for all
