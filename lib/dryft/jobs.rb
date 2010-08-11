@@ -31,11 +31,11 @@ class Jobs
   end
   
   def resolve_list(job_list)
-    order = []
+    resolved = []
     job_list.each{ |j|
-      order = resolve_order(j, order)
+      resolved = resolve(j, resolved)
     }
-    order
+    resolved
   end
   
   def resolve(job, resolved = [], unresolved = [])
