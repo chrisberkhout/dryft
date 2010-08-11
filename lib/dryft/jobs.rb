@@ -31,7 +31,7 @@ class Jobs
     jobs
   end
   
-  def resolve_order_all(job_list)
+  def resolve_list(job_list)
     order = []
     job_list.each{ |j|
       order = resolve_order(j, order)
@@ -39,7 +39,7 @@ class Jobs
     order
   end
   
-  def resolve_order(job, resolved = [], unresolved = [])
+  def resolve(job, resolved = [], unresolved = [])
     if job.not_in? resolved
       unresolved << job
       job.deps.each { |dep|
@@ -54,7 +54,5 @@ class Jobs
     end
     return resolved
   end
-  
-  
   
 end
