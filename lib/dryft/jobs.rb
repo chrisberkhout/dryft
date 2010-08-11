@@ -4,8 +4,7 @@ class Jobs
     @db = SQLite3::Database.new db_file
     @job_list = get_jobs
     
-    puts resolve_order_all(@job_list).map{|j|j.name}.join("\n")
-    # resolve_order_all(@job_list,self)
+    puts resolve_list(@job_list).map{|j|j.name}.join("\n")
     
   end
 
@@ -46,7 +45,7 @@ class Jobs
         abort "ERROR: at '#{job.name}:#{dep[:start]}', the procedure <#{dep.proc}> is used but not defined." if by_proc(dep[:proc]).nil?
         if by_proc(dep[:proc]).not_in? resolved
           abort "ERROR: circular dependency detected: <#{job.proc}> -> <#{dep.proc}>." if by_proc(dep[:proc]).is_in? unresolved
-          resolved = resolve_order(by_proc(dep[:proc]), resolved, unresolved)
+          resolved = resolve(by_proc(dep[:proc]), resolved, unresolved)
           unresolved -= resolved
         end
       }
