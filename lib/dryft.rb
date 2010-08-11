@@ -5,6 +5,8 @@ require 'nokogiri'
 
 require 'ruby/object'
 
+require 'dryft/jobs'
+require 'dryft/job'
 
 
 # db = SQLite3::Database.new "/Users/chrisberkhout/Projects/matholroyd/dryft-data/Jobs.dat"
@@ -113,10 +115,18 @@ order.each { |proc|
 
 }
 
+# j = Job.new(db, :id => '3D94415664E0454CA1424FAD03BEB744')
+# # j = Job.new(db, :name => '<C full install of EM and plugins>')
+# # j = Job.new(db, :proc => 'C full install of EM and plugins')
+# puts j.id
+# puts j.name
+# puts j.proc
+# puts j.deps.to_yaml
+
+Jobs.new("/Users/chrisberkhout/Desktop/Jobs.dat")
 
 
 # TODO:
 # - how can Job instances do updates from their deps (they would assume the deps are up-to-date)
 #   - how can Job instances find other jobs/deps (will Jobs have a list and allow lookup by id/name/proc ?)
-
-
+#   - i think i need dep_acts in @deps (and prob not start/end) so that those acts to be replaced can still be found with parts of the doc changing.
