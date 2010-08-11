@@ -4,7 +4,7 @@ class Jobs
     @db = SQLite3::Database.new db_file
     @job_list = get_jobs
     
-    puts resolve_order_all(@job_list,self).map{|j|j.name}.join("\n")
+    puts resolve_order_all(@job_list).map{|j|j.name}.join("\n")
     # resolve_order_all(@job_list,self)
     
   end
@@ -31,22 +31,22 @@ class Jobs
     jobs
   end
   
-  def resolve_order_all(job_list, jobs)
+  def resolve_order_all(job_list)
     order = []
     job_list.each{ |j|
-      order = resolve_order(j, self, order)
+      order = resolve_order(j, order)
     }
     order
   end
   
-  def resolve_order(job, jobs, resolved, unresolved = [])
+  def resolve_order(job, resolved = [], unresolved = [])
     if job.not_in? resolved
       unresolved << job
       job.deps.each { |dep|
-        abort "ERROR: at '#{job.name}:#{dep[:start]}', the procedure <#{dep.proc}> is used but not defined." if jobs.by_proc(dep[:proc]).nil?
-        if jobs.by_proc(dep[:proc]).not_in? resolved
-          abort "ERROR: circular dependency detected: <#{job.proc}> -> <#{dep.proc}>." if jobs.by_proc(dep[:proc]).is_in? unresolved
-          resolved = resolve_order(jobs.by_proc(dep[:proc]), jobs, resolved, unresolved)
+        abort "ERROR: at '#{job.name}:#{dep[:start]}', the procedure <#{dep.proc}> is used but not defined." if by_proc(dep[:proc]).nil?
+        if by_proc(dep[:proc]).not_in? resolved
+          abort "ERROR: circular dependency detected: <#{job.proc}> -> <#{dep.proc}>." if by_proc(dep[:proc]).is_in? unresolved
+          resolved = resolve_order(by_proc(dep[:proc]), resolved, unresolved)
           unresolved -= resolved
         end
       }
