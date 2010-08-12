@@ -3,7 +3,6 @@ class Job
   attr_reader :id, :name, :proc, :def_acts, :deps
 
   def initialize(db, info)
-    # load from database
     @db = db
     @id = get_id(db, info)
     load
@@ -11,6 +10,17 @@ class Job
   
   def reload
     load
+  end
+  
+  def update_from_deps(jobs)
+    @deps.each { |dep|
+      dep_job = jobs.by_proc(dep[:proc])
+      dep[:acts].after( dep_job.def_acts.to_xml )
+      dep[:acts].unlink
+    }
+    updated_code = @doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
+    @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", updated_code, @id)
+    reload
   end
   
   protected
@@ -57,14 +67,14 @@ class Job
     @actions.each_with_index { |a,i|
       
       comment = a.xpath("./descendant-or-self::xmlns:CommentAction/xmlns:Comment").first
-      if comment && comment.inner_html =~ /^\<([^\/\>].*?)\>.*/ # opening tag
+      if comment && comment.inner_text =~ /^\<([^\/\>].*?)\>.*/ # opening tag
 
         tag = $1
         abort "ERROR: at '#{@name}:#{i+1}', attempt to define <#{@proc}> within <#{stack.last[:tag]}>." if tag == @proc && stack.length > 0
         abort "ERROR: at '#{@name}:#{i+1}', reopening <#{tag}> here implies circular dependency." if tag.is_in? stack.map{ |e| e[:tag] }
         stack.push({:tag => tag, :start => (i+1) })
 
-      elsif comment && comment.inner_html =~ /^\<\/(.*?)\>.*/ # closing tag
+      elsif comment && comment.inner_text =~ /^\<\/(.*?)\>.*/ # closing tag
 
         tag = $1
         abort "ERROR: at '#{name}:#{i+1}', attempt to close <#{tag}> when nothing was open." if stack.length == 0
@@ -73,7 +83,7 @@ class Job
           def_start = stack.last[:start]
           def_end   = i+1
         elsif stack.length == 1 || stack[-2][:tag] == @proc # end of definition of a direct dependency
-          @deps.push({ :proc => tag, :start => stack.last[:start], :end => i+1 })
+          @deps.push({ :proc => tag, :start => stack.last[:start], :end => i+1, :acts => @actions[(stack.last[:start]-1)..(i)] })
         end
         stack.pop
 
@@ -86,7 +96,7 @@ class Job
     abort "ERROR: in '#{@name}', the following tags were not closed: <#{stack.map{ |e| e[:tag] }.join('>, <')}>." if stack.length > 0
     
     @def_acts = @actions[ (def_start-1) .. (def_end-1) ]
-    
+
   end # parse
 
 

@@ -28,7 +28,7 @@ db.execute("SELECT hex(i.id), i.name, c.code FROM jobinfo i, jobcode c WHERE i.i
       
       comment = a.xpath("./descendant-or-self::xmlns:CommentAction/xmlns:Comment").first
       
-      if comment && comment.inner_html =~ /^\<([^\/\>].*?)\>.*/ # opening tag
+      if comment && comment.inner_text =~ /^\<([^\/\>].*?)\>.*/ # opening tag
         tag = $1
         
         abort "ERROR: at '#{name}:#{i+1}', reopening <#{tag}> here implies circuar dependency." if tag.is_in? tag_stack
@@ -45,7 +45,7 @@ db.execute("SELECT hex(i.id), i.name, c.code FROM jobinfo i, jobcode c WHERE i.i
     
         tag_stack.push tag
         
-      elsif comment && comment.inner_html =~ /^\<\/(.*?)\>.*/ # closing tag
+      elsif comment && comment.inner_text =~ /^\<\/(.*?)\>.*/ # closing tag
         tag = $1
         abort "ERROR: at '#{name}:#{i+1}', attempt to close <#{tag}> when nothing was open." if tag_stack.length == 0
         abort "ERROR: at '#{name}:#{i+1}', attempt to close <#{tag}> when close of <#{tag_stack.last}> was expected." if tag_stack.last != tag
@@ -75,7 +75,7 @@ db.execute("SELECT hex(i.id), i.name, c.code FROM jobinfo i, jobcode c WHERE i.i
   
 } # db.execute
 
-puts proc_info.to_yaml
+# puts proc_info.to_yaml
 
 
 def resolve_order_all(proc_info)
@@ -127,6 +127,6 @@ Jobs.new("/Users/chrisberkhout/Desktop/Jobs.dat")
 
 
 # TODO:
-# - how can Job instances do updates from their deps (they would assume the deps are up-to-date)
-#   - how can Job instances find other jobs/deps (will Jobs have a list and allow lookup by id/name/proc ?)
-#   - i think i need dep_acts in @deps (and prob not start/end) so that those acts to be replaced can still be found with parts of the doc changing.
+# - need dep_acts in @deps (keep start/end)
+# - code in job to delete dep acts in doc and replace from dep def. write doc back to db, reload.
+

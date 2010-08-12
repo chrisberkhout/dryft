@@ -3,9 +3,7 @@ class Jobs
   def initialize(db_file)
     @db = SQLite3::Database.new db_file
     @job_list = get_jobs
-    
-    puts resolve_list(@job_list).map{|j|j.name}.join("\n")
-    
+    update_all
   end
 
   def by_id(id)
@@ -16,6 +14,12 @@ class Jobs
   end
   def by_proc(proc)
     (@job_list.select{ |j| j.proc == proc })[0]
+  end
+
+  def update_all
+    resolve_list(@job_list).each { |j|
+      j.update_from_deps(self)      
+    }
   end
   
   protected 
@@ -32,9 +36,7 @@ class Jobs
   
   def resolve_list(job_list)
     resolved = []
-    job_list.each{ |j|
-      resolved = resolve(j, resolved)
-    }
+    job_list.each{ |j| resolved = resolve(j, resolved) }
     resolved
   end
   
