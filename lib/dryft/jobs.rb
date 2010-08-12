@@ -3,7 +3,6 @@ class Jobs
   def initialize(db_file)
     @db = SQLite3::Database.new db_file
     @job_list = get_jobs
-    update_all
   end
 
   def by_id(id)

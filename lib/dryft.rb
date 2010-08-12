@@ -4,13 +4,10 @@ require 'sqlite3'
 require 'nokogiri'
 
 require 'ruby/object'
+require 'nokogiri/node'
+require 'nokogiri/node_set'
 
-require 'dryft/jobs'
 require 'dryft/job'
+require 'dryft/jobs'
 
-# Jobs.new("/Users/chrisberkhout/Projects/matholroyd/dryft-data/Jobs.dat")
-Jobs.new("/Users/chrisberkhout/Desktop/Jobs.dat")
-
-
-# TODO:
-# - print message about code change.
+Jobs.new("/Users/chrisberkhout/Desktop/Jobs.dat").update_all

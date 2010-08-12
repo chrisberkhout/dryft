@@ -13,14 +13,21 @@ class Job
   end
   
   def update_from_deps(jobs)
+    no_change = true
     @deps.each { |dep|
-      dep_job = jobs.by_proc(dep[:proc])
-      dep[:acts].after( dep_job.def_acts.to_xml )
-      dep[:acts].unlink
+      src_job = jobs.by_proc(dep[:proc])
+      if dep[:acts].not_equivalent_to?( src_job.def_acts )
+        no_change = false
+        puts "At #{@name}:#{dep[:start]}, updating procedure <#{dep[:proc]}> from its definition."
+        dep[:acts].after( src_job.def_acts.to_xml )
+        dep[:acts].unlink
+      end
     }
-    updated_code = @doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
-    @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", updated_code, @id)
-    reload
+    unless no_change
+      updated_code = @doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
+      @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", updated_code, @id)
+      reload
+    end
   end
   
   protected
@@ -96,9 +103,6 @@ class Job
     abort "ERROR: in '#{@name}', the following tags were not closed: <#{stack.map{ |e| e[:tag] }.join('>, <')}>." if stack.length > 0
     
     @def_acts = @actions[ (def_start-1) .. (def_end-1) ]
-
   end # parse
 
-
-  
 end
