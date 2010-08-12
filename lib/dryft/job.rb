@@ -18,14 +18,14 @@ class Job
       src_job = jobs.by_proc(dep[:proc])
       if dep[:acts].not_equivalent_to?( src_job.def_acts )
         no_change = false
-        puts "At #{@name}:#{dep[:start]}, updating procedure <#{dep[:proc]}> from its definition."
         dep[:acts].after( src_job.def_acts.to_xml )
         dep[:acts].unlink
+        puts "At #{@name}:#{dep[:start]}, updated procedure <#{dep[:proc]}> from its definition."
       end
     }
     unless no_change
       updated_code = @doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
-      @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", updated_code, @id)
+      @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", [updated_code, @id])
       reload
     end
   end
@@ -37,12 +37,12 @@ class Job
     when :id
       info[:id]
     when :name
-      rows = db.execute("SELECT hex(id) FROM jobinfo WHERE name = ?", info[:name])
+      rows = db.execute("SELECT hex(id) FROM jobinfo WHERE name = ?", [info[:name]])
       abort "ERROR: tried to load the job named '#{info[:name]}', but that name is not unique." if rows.length > 1
       abort "ERROR: tried to load the job named '#{info[:name]}', but it was not found." if rows.length == 0
       rows[0][0]
     when :proc
-      rows = db.execute("SELECT hex(id) FROM jobinfo WHERE name LIKE ?", "<#{info[:proc]}>%")
+      rows = db.execute("SELECT hex(id) FROM jobinfo WHERE name LIKE ?", ["<#{info[:proc]}>%"])
       abort "ERROR: tried to load the procedure named '#{info[:proc]}', but that name is not unique." if rows.length > 1
       abort "ERROR: tried to load the job named '#{info[:proc]}', but it was not found." if rows.length == 0
       rows[0][0]
@@ -50,7 +50,7 @@ class Job
   end
   
   def load
-    rows = @db.execute("SELECT hex(i.id), i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c.id AND hex(i.id) = ?", @id)
+    rows = @db.execute("SELECT hex(i.id), i.name, c.code FROM jobinfo i, jobcode c WHERE i.id = c.id AND hex(i.id) = ?", [@id])
     abort "ERROR: tried to load the job with ID '#{@id}', but it was not found." if rows.length == 0
     @id, @name, @code = rows[0]
     if @name =~ /^\<([^\/\>].*?)\>.*/

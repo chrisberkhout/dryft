@@ -1,7 +1,9 @@
 class Jobs
   
   def initialize(db_file)
+    abort "ERROR: The specified WinAutomation jobs database does not exist: #{db_file}" if !File.exists?(db_file)
     @db = SQLite3::Database.new db_file
+    puts "Loaded the WinAutomation jobs database from: #{db_file}"
     @job_list = get_jobs
   end
 
@@ -19,6 +21,7 @@ class Jobs
     resolve_list(@job_list).each { |j|
       j.update_from_deps(self)      
     }
+    puts "Updated all procedures."
   end
   
   protected 
