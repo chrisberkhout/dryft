@@ -46,9 +46,9 @@ class Jobs
     if job.not_in? resolved
       unresolved << job
       job.deps.each { |dep|
-        abort "ERROR: at '#{job.name}:#{dep[:start]}', the procedure <#{dep.proc}> is used but not defined." if by_proc(dep[:proc]).nil?
+        abort "ERROR: at '#{job.name}:#{dep[:start]}', the procedure <#{dep[:proc]}> is used but not defined." if by_proc(dep[:proc]).nil?
         if by_proc(dep[:proc]).not_in? resolved
-          abort "ERROR: circular dependency detected: <#{job.proc}> -> <#{dep.proc}>." if by_proc(dep[:proc]).is_in? unresolved
+          abort "ERROR: circular dependency detected: <#{job.proc}> -> <#{dep[:proc]}>." if by_proc(dep[:proc]).is_in? unresolved
           resolved = resolve(by_proc(dep[:proc]), resolved, unresolved)
           unresolved -= resolved
         end

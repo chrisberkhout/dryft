@@ -23,7 +23,9 @@ class Job
         puts "At #{@name}:#{dep[:start]}, updated procedure <#{dep[:proc]}> from its definition."
       end
     }
-    unless no_change
+    if no_change
+      puts "No change to '#{@name}'."
+    else
       updated_code = @doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
       @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", [updated_code, @id])
       reload
