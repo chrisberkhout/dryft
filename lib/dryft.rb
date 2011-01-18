@@ -1,5 +1,7 @@
 
 require 'rubygems'
+require 'bundler/setup'
+
 require 'sqlite3'
 require 'nokogiri'
 

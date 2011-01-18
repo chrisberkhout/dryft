@@ -1,21 +1,24 @@
-require 'rubygems'
-SPEC = Gem::Specification.new do |s|
-  s.name                = "dryft"
-  s.description         = "Don't Repeat Yoursef Factoring Tool for WinAutomation"
-  s.summary             = "Define WinAutomation procedures that can be included elsewhere without consistency issues."
-  s.version             = "1.0.0"
-  s.rubyforge_project   = "nowarning"
-  s.author              = "Chris Berkhout"
-  s.email               = "chrisberkhout@gmail.com"
-  s.homepage            = "http://chrisberkhout.com"
-  s.executables         = ["dryft"]
-  s.default_executable  = "dryft"
-  candidates            = Dir.glob("{bin,docs,lib,tests}/**/*")
-  s.files               = candidates.delete_if { |i| i.include?(".git") }
-  s.require_path        = "lib"
-  s.has_rdoc            = true
-  s.extra_rdoc_files    = ["README.rdoc"]
-  s.platform            = Gem::Platform::RUBY
-  s.add_dependency("sqlite3-ruby", ">= 1.3.1")
-  s.add_dependency("nokogiri", ">= 1.4.3.1")
+# -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
+require "dryft/version"
+
+Gem::Specification.new do |s|
+  s.name        = "dryft"
+  s.version     = Dryft::VERSION
+  s.platform    = Gem::Platform::RUBY
+  s.authors     = ["Chris Berkhout"]
+  s.email       = ["chrisberkhout@gmail.com"]
+  s.homepage    = "http://github.com/chrisberkhout/dryft"
+  s.summary     = %q{Don't Repeat Yoursef Factoring Tool for WinAutomation}
+  s.description = %q{Define WinAutomation procedures that can be included elsewhere without consistency issues.}
+
+  s.rubyforge_project = "dryft"
+
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.require_paths = ["lib"]
+
+  s.add_dependency("sqlite3-ruby")
+  s.add_dependency("nokogiri")
 end

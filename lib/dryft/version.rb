@@ -1,0 +1,3 @@
+module Dryft
+  VERSION = "0.0.1"
+end
