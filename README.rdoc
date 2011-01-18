@@ -1,78 +1,106 @@
 = DRYFT for WinAutomation
 
-== DESCRIPTION:
+== Description
 
-DRYFT (Don't Repeat Yourself Factoring Tool) lets you define WinAutomation 
-procedures that can be included in multiple other places and easily 
-maintined from their original definition locations without introducing 
-consistency issues.
+DRYFT (Don't Repeat Yourself Factoring Tool) lets you define procedures in
+WinAutomation[http://www.winautomation.com/] that can be included in multiple
+other places and easily maintained from their original definition locations
+without introducing consistency issues.
 
-== INSTALLATION:
+== Installation
 
-1. Install Ruby 1.8.7 with 'RubyInstaller for Windows'[http://rubyinstaller.org]
-2. Run `gem install dryft`
-3. Complete any additional setup for the sqlite3-ruby gem.
+1. Install Ruby 1.8.7 with 
+   {RubyInstaller for Windows}[http://rubyinstaller.org].
+2. Run <tt>gem install dryft</tt>.
+3. Complete any additional setup for the <tt>sqlite3-ruby</tt> gem.
 
-== CONVENTIONS FOR PROCEDURES:
+== Conventions for procedures
 
-To define a procedure, create a job with a name enclosed in angle brackets:
-e.g. "<your procedure name>". Extra text may follow the closing bracket and 
-will not be considered part of the procedure name, however, the opening 
-bracket must be the first character of the job name.
+A procedure is a WinAutomation job that follows DRYFT conventions, and can
+therefore have DRYFT manage its dependencies on other procedures.
 
-DRYFT ignores any jobs that do not follow the procedure naming convention.
+=== Creating a procedure
+
+To create a procedure, create a job with a name enclosed in angle brackets: e.g.
+<tt><your procedure name></tt>. Extra text may follow the closing bracket and
+will not be considered part of the procedure name, however, the opening bracket
+must be the first character of the job name.
+
+DRYFT ignores any jobs that do not follow the procedure naming convention. Only
+proper procedures can include other procedures.
+
+=== Defining the steps of a procedure
 
 Inside the job, start the procedure definition with a comment step starting:
-"<your procedure name>". The procedure name must be at the start of the comment,
-but may be followed by other text. This is the opening tag.
+<tt><your procedure name></tt>. The procedure name must be at the start of the
+comment, but may be followed by other text. This is the opening tag.
 
 After that, add another comment step that has the procedure name with a 
-forward-slash following the opening angle bracket: "</your procedure name>".
-This is the closing tag.
+forward-slash following the opening angle bracket: 
+<tt></your procedure name></tt>. This is the closing tag.
 
-Any steps you place between the opening and closing tags will be considered 
-part of the procedure definition and will be copied to wherever the procedure
-is used in other procedures. Any steps before the opening tag or after the 
-closing tag will not be copyed.
+Any steps you place between the opening and closing tags will be considered part
+of the procedure definition and will be copied to wherever the procedure is used
+in other procedures. Any steps before the opening tag or after the closing tag
+will not be copyed.
 
-This means that you can use the steps before the opening tag to help you make
-the procedure definition job run by itself. For example, you may have a large 
+This means that you can use steps outside of the definition to help you make the
+procedure definition job run by itself. For example, you may have a large 
 procedure that dynamically sets up certain configuration variables before 
 calling a smaller procedure. In the job defining the smaller procedure you can
-hard code the configuration variables before the opening tag so that that job 
-can be run by itself. Still, only the steps between the tags will be copied
-when the procedure is used elsewhere.
+hard-code the configuration variables before the opening tag so that that job can
+be run by itself.
 
-Similarly, steps after the closing tag can be used to provide feedback that
-is helpful when running the procedure job individually, but which shouldn't
-be included when the procedure is used within a larger one.
+Similarly, steps after the closing tag can be used to provide feedback that is
+helpful when running the procedure definition job individually, but which
+shouldn't be included when the procedure is used within a larger one.
 
-To use one procedure within another, copy the steps from the opening tag
-to the closing tag in the source procedure, and paste them into the 
-destination procedure wherever you want them to run.
+=== Using a procedure in other procedures
+
+To use one procedure within another, copy the steps from the opening tag to the
+closing tag in the source procedure, and paste them into the destination 
+procedure wherever you want them to run.
+
+=== Updating a procedure automatically
 
 Now, if you make some changes to the procedure in its defining job, you can
-run DRYFT to automatically copy those changes across to wherever that 
-procedure is used in others. Be aware that if you change the steps between
-a procedures opening and closing tags in a job it is being used (not defined),
-DRYFT will overwrite those changes with the old steps from the original 
-procedure definition job.
+run DRYFT to automatically copy those changes across to wherever that procedure
+is used in others. Be aware that if you change the steps between a procedures
+opening and closing tags in a job that uses it (rather than defines it), DRYFT
+will overwrite those changes with the old steps from the original procedure
+definition job.
 
-A procedure can include multiple other procedures and they can be nested
-to any depth. DRYFT resovles dependencies so that any given procedure will only
-ever be updated after all of its dependencies have been updated. It will
-detect improper use of opening and closing tags and generate appropriate error
-messages. For example, it will report unbalanced tags, use of undefined 
-procedures and circular dependencies. 
+A procedure can include multiple other procedures and they can be nested to any
+depth. DRYFT resovles dependencies so that any given procedure will only ever be
+updated after all of its dependencies have been updated. It will detect improper
+use of opening and closing tags and generate appropriate error messages. For
+example, it will report unbalanced tags, use of undefined procedures and 
+circular dependencies. 
 
-So, go ahead and define procedures as you please, maintain them from their
-original definition jobs and run DRYFT often to ensure your jobs database
-is consistent.
+=== In conclusion
 
-== USAGE:
+Go ahead and define procedures as you please, maintain them from their original
+definition jobs and run DRYFT often to ensure your jobs database is consistent.
+
+== Usage
 
 To run load and update the default WinAutomation jobs database:
   dryft
 
-To land and update a WinAutomation jobs database in a different location:
+To load and update a WinAutomation jobs database in a different location:
   dryft \path\to\your\Jobs.dat
+
+== Compatibility
+
+DRYFT has been developed using WinAutomation version 3.1.4.628 (released 
+December 17, 2010). It may work on earlier versions and will probably work
+on later 3.1.x versions.
+
+== Copyright
+
+DRYFT comes to you under the MIT license. See LICENSE.txt for details.
+
+== Feedback
+
+I would love to hear any feedback you have about DRYFT! 
+The best way to reach me is via email at gmail.com (chrisberkhout@).
