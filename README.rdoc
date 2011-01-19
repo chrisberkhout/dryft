@@ -75,12 +75,18 @@ depth. DRYFT resovles dependencies so that any given procedure will only ever be
 updated after all of its dependencies have been updated. It will detect improper
 use of opening and closing tags and generate appropriate error messages. For
 example, it will report unbalanced tags, use of undefined procedures and 
-circular dependencies. 
+circular dependencies.
+
+When using the WinAutomation console, it is necessary to press F5 to refresh
+the job list after DRYFT performs updates. This is because updated jobs are 
+assigned new IDs as a way of forcing the WinAutomation to disregard its old copy
+of the job code.
 
 === In conclusion
 
 Go ahead and define procedures as you please, maintain them from their original
-definition jobs and run DRYFT often to ensure your jobs database is consistent.
+definition jobs and run DRYFT (and refresh with F5) often to ensure your jobs 
+database is consistent.
 
 == Usage
 

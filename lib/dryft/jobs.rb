@@ -21,7 +21,8 @@ module DRYFT
       resolve_list(@job_list).each do |j|
         j.update_from_deps(self)      
       end
-      puts "Updated all procedures."
+      puts "Updated all procedures.\n\n"
+      puts "Please PRESS F5 in the WinAutomation Console to refresh the jobs list!"
     end
   
     protected 

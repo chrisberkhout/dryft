@@ -29,6 +29,20 @@ module DRYFT
       else
         updated_code = @doc.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::NO_DECLARATION)
         @db.execute("UPDATE jobcode SET code = ? WHERE hex(id) = ?", [updated_code, @id])
+
+        # Switch to a new job ID, because there is no way to trigger a reload ov the original job ID's code.
+        new_id = @db.execute("SELECT HEX(RANDOMBLOB(LENGTH(Id))) FROM jobcode")[0][0]
+        @db.execute("UPDATE compilerproperties SET JobId = x'#{new_id}' WHERE hex(JobId) = ?", [@id])
+        @db.execute("UPDATE jobaddon SET JobId = x'#{new_id}' WHERE hex(JobId) = ?", [@id])
+        @db.execute("UPDATE jobaddonassembly SET JobId = x'#{new_id}' WHERE hex(JobId) = ?", [@id])
+        @db.execute("UPDATE jobattachment SET JobId = x'#{new_id}' WHERE hex(JobId) = ?", [@id])
+        @db.execute("UPDATE jobcode SET Id = x'#{new_id}' WHERE hex(Id) = ?", [@id])
+        @db.execute("UPDATE jobinfo SET Id = x'#{new_id}' WHERE hex(Id) = ?", [@id])
+        @db.execute("UPDATE jobproperties SET Id = x'#{new_id}' WHERE hex(Id) = ?", [@id])
+        @db.execute("UPDATE jobproperties2 SET Id = x'#{new_id}' WHERE hex(Id) = ?", [@id])
+        @db.execute("UPDATE triggers SET JobId = x'#{new_id}' WHERE hex(JobId) = ?", [@id])
+        @id = new_id
+
         reload
       end
     end

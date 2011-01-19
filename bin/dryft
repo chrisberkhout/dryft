@@ -3,4 +3,4 @@
 require 'dryft'
 
 db_file = ARGV[0] || '\Documents and Settings\All Users\Application Data\Softomotive\WinAutomation\Jobs.dat' 
-Jobs.new(db_file).update_all
+DRYFT::Jobs.new(db_file).update_all
