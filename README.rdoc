@@ -79,7 +79,7 @@ circular dependencies.
 
 When using the WinAutomation console, it is necessary to press F5 to refresh
 the job list after DRYFT performs updates. This is because updated jobs are 
-assigned new IDs as a way of forcing the WinAutomation to disregard its old copy
+assigned new IDs as a way of forcing WinAutomation to disregard its old copy
 of the job code.
 
 === In conclusion
