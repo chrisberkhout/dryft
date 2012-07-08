@@ -14,6 +14,10 @@ without introducing consistency issues.
 2. Run <tt>gem install dryft</tt>.
 3. Complete any additional setup for the <tt>sqlite3-ruby</tt> gem.
 
+== Status
+
+Completed but unmaintained.
+
 == Conventions for procedures
 
 A procedure is a WinAutomation job that follows DRYFT conventions, and can
